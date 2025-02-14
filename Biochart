@@ -1,0 +1,118 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from datetime import datetime, timedelta
+
+def days_alive(birthdate):
+    birthdate = datetime.strptime(birthdate, '%Y-%m-%d')
+    return (datetime.now() - birthdate).days
+
+def biorhythm(days, cycle_length):
+    return np.sin(2 * np.pi * days / cycle_length)
+
+def plot_biorhythm_chart(days, name, birthdate):
+    x = np.linspace(0, 30, 300)
+    physical = biorhythm(days + x, 23)
+    emotional = biorhythm(days + x, 28)
+    intellectual = biorhythm(days + x, 33)
+    wisdom = (emotional + intellectual) / 2
+    mastery = (physical + intellectual) / 2
+    passion = (emotional + physical) / 2
+    intuition = biorhythm(days + x, 38)
+    aesthetics = biorhythm(days + x, 43)
+    awareness = biorhythm(days + x, 48)
+    spirituality = biorhythm(days + x, 53)
+
+    # Plotting primary cycles
+    plt.figure(figsize=(10, 6))
+    plt.plot(x, physical, label='Physical')
+    plt.plot(x, emotional, label='Emotional')
+    plt.plot(x, intellectual, label='Intellectual')
+    plt.title(f'Primary Biorhythm Chart for {name}')
+    plt.xlabel('Days from today')
+    plt.ylabel('Biorhythm')
+    plt.axhline(0, color='black',linewidth=0.5)
+    plt.grid(color = 'gray', linestyle = '--', linewidth = 0.5)
+    plt.legend()
+    plt.show()
+
+    # Plotting secondary cycles
+    plt.figure(figsize=(10, 6))
+    plt.plot(x, wisdom, label='Wisdom')
+    plt.plot(x, mastery, label='Mastery')
+    plt.plot(x, passion, label='Passion')
+    plt.title(f'Secondary Biorhythm Chart for {name}')
+    plt.xlabel('Days from today')
+    plt.ylabel('Biorhythm')
+    plt.axhline(0, color='black',linewidth=0.5)
+    plt.grid(color = 'gray', linestyle = '--', linewidth = 0.5)
+    plt.legend()
+    plt.show()
+
+    # Plotting I-Ching cycles
+    plt.figure(figsize=(10, 6))
+    plt.plot(x, intuition, label='Intuition')
+    plt.plot(x, aesthetics, label='Aesthetics')
+    plt.plot(x, awareness, label='Awareness')
+    plt.plot(x, spirituality, label='Spirituality')
+    plt.title(f'I-Ching Biorhythm Chart for {name}')
+    plt.xlabel('Days from today')
+    plt.ylabel('Biorhythm')
+    plt.axhline(0, color='black',linewidth=0.5)
+    plt.grid(color = 'gray', linestyle = '--', linewidth = 0.5)
+    plt.legend()
+    plt.show()
+
+def compatibility_chart(days1, days2, name1, name2):
+    x = np.linspace(0, 30, 300)
+    cycles1 = {
+        'physical': biorhythm(days1 + x, 23),
+        'emotional': biorhythm(days1 + x, 28),
+        'intellectual': biorhythm(days1 + x, 33),
+    }
+    cycles2 = {
+        'physical': biorhythm(days2 + x, 23),
+        'emotional': biorhythm(days2 + x, 28),
+        'intellectual': biorhythm(days2 + x, 33),
+    }
+
+    compatibility_primary = {}
+    compatibility_secondary = {}
+    compatibility_tertiary = {}
+
+    for key in cycles1:
+        compatibility_primary[key] = 100 - np.mean(np.abs(cycles1[key] - cycles2[key])) * 100 / 2
+
+    compatibility_secondary['wisdom'] = 100 - np.mean(np.abs((cycles1['emotional'] + cycles1['intellectual']) / 2 - (cycles2['emotional'] + cycles2['intellectual']) / 2)) * 100 / 2
+    compatibility_secondary['mastery'] = 100 - np.mean(np.abs((cycles1['physical'] + cycles1['intellectual']) / 2 - (cycles2['physical'] + cycles2['intellectual']) / 2)) * 100 / 2
+    compatibility_secondary['passion'] = 100 - np.mean(np.abs((cycles1['emotional'] + cycles1['physical']) / 2 - (cycles2['emotional'] + cycles2['physical']) / 2)) * 100 / 2
+
+    cycles1['intuition'] = biorhythm(days1 + x, 38)
+    cycles1['aesthetics'] = biorhythm(days1 + x, 43)
+    cycles1['awareness'] = biorhythm(days1 + x, 48)
+    cycles1['spirituality'] = biorhythm(days1 + x, 53)
+
+    cycles2['intuition'] = biorhythm(days2 + x, 38)
+    cycles2['aesthetics'] = biorhythm(days2 + x, 43)
+    cycles2['awareness'] = biorhythm(days2 + x, 48)
+    cycles2['spirituality'] = biorhythm(days2 + x, 53)
+
+    for key in ['intuition', 'aesthetics', 'awareness', 'spirituality']:
+        compatibility_tertiary[key] = 100 - np.mean(np.abs(cycles1[key] - cycles2[key])) * 100 / 2
+
+    print(f"Primary Compatibility between {name1} and {name2}: {compatibility_primary}")
+    print(f"Secondary Compatibility between {name1} and {name2}: {compatibility_secondary}")
+    print(f"Tertiary Compatibility between {name1} and {name2}: {compatibility_tertiary}")
+
+if __name__ == "__main__":
+    name1 = input("Enter the first person's name: ")
+    birthdate1 = input("Enter the first person's birthdate (YYYY-MM-DD): ")
+    name2 = input("Enter the second person's name (optional): ")
+    birthdate2 = input("Enter the second person's birthdate (YYYY-MM-DD, optional): ")
+
+    days1 = days_alive(birthdate1)
+    plot_biorhythm_chart(days1, name1, birthdate1)
+
+    if name2 and birthdate2:
+        days2 = days_alive(birthdate2)
+        plot_biorhythm_chart(days2, name2, birthdate2)
+        compatibility_chart(days1, days2, name1, name2)
